@@ -1,0 +1,6 @@
+export interface CurrentUser {
+  id: number;
+  email: string;
+  name: string;
+  createdAt: string;
+}

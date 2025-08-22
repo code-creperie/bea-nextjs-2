@@ -1,0 +1,82 @@
+'use client';
+
+import { SubmitEvent, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Header from '../components/Header';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function handleSubmit(e: SubmitEvent) {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to log in');
+
+      router.push('/');
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong');
+    }
+  }
+
+  return (
+    <>
+      <Header subtitle="Log in to your account" />
+      <div className="container mx-auto my-8 px-4">
+        <div className="max-w-md mx-auto bg-white p-6 sm:p-8 shadow-lg rounded-lg">
+          {error && <p className="text-center text-red-600 py-4">{error}</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-gray-700 font-medium mb-1">Email</label>
+              <input
+                type="email"
+                id="email"
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="password" className="block text-gray-700 font-medium mb-1">Password</label>
+              <input
+                type="password"
+                id="password"
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-yellow-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-yellow-700 transition-colors"
+            >
+              Log in
+            </button>
+          </form>
+          <p className="text-center text-sm text-gray-600 mt-4">
+            Don’t have an account?{' '}
+            <Link href="/signup" className="text-yellow-700 hover:underline">
+              Sign up here
+            </Link>
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
